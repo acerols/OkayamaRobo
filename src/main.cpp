@@ -1,34 +1,36 @@
 #include <Arduino.h>
 #include "AWDControl.hpp"
 
+const static int D1M1D = 2;
+const static int D1M1P = 3;
+const static int D1M2D = 4;
+const static int D1M2P = 5;
+const static int D2M1D = 6;
+const static int D2M1P = 7;
+const static int D2M2D = 8;
+const static int D2M2P = 9;
+
 void setup() {
   	// put your setup code here, to run once:
-	pinMode(2, OUTPUT);	
-	pinMode(3, OUTPUT);
-  	pinMode(4, OUTPUT);
-  	pinMode(5, OUTPUT);
+	pinMode(D1M1D, OUTPUT);	
+	pinMode(D1M1P, OUTPUT);
+  	pinMode(D1M2D, OUTPUT);	
+	pinMode(D2M2P, OUTPUT);
+	pinMode(D2M1P, OUTPUT);
+  	pinMode(D2M2D, OUTPUT);	
+	pinMode(D2M2P, OUTPUT);
+	
+	Serial.begin(9600);
 }
 
 void loop() {
 	// put your main code here, to run repeatedly:
-	const int MP = 200;
-	AwdControl ctr(2,3,4,5,6,7,8,9);
+	const int MP = 100;
+	AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
+					D2M1D, D2M1P, D2M2D, D2M2P
+	);
 	ctr.movefored();
-	/*
-	digitalWrite(2, LOW);
-	analogWrite(3, MP);
-	digitalWrite(4, LOW);
-	analogWrite(5, MP);
-	delay(1000);
-	for(int i = 2; i <= 5; i++){
-		digitalWrite(i, LOW);
-	}
-	
-	delay(1000);
-	digitalWrite(3, LOW);
-	analogWrite(2, MP);
-	digitalWrite(5, LOW);
-	analogWrite(4, MP);
-	*/
+	//analogWrite(D1M1P, 174);
+	//analogWrite(D2M2P, 174);
 	while(1);
 }

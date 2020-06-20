@@ -158,16 +158,20 @@ int deg2out(int deg, int MN, int speeds)
 void AwdControl::movefored(void)
 {
     int v[4][2] = {0};
-    for(int i = 1; i <= MOTORNUM; i++){
-        v[i-1][1] = deg2out(90, i);
+
+    for(int i = 1; i < MOTORNUM+1; i++){
+        v[i-1][1] = deg2out(90, i, 250);
         if(v[i-1][1] > 0){
             v[i-1][0] = 1;
         }
         else{
             v[i-1][0] = -1;
         }
+        Serial.print(i);
+        Serial.print(" : output : ");
+        Serial.println(v[i-1][1]);
     }
-
+    Serial.println("End");
     ControlD1M1(v[0][0], v[0][1]);
     ControlD1M2(v[1][0], v[1][1]);
     ControlD2M1(v[2][0], v[2][1]);
@@ -178,7 +182,7 @@ void AwdControl::movedir(int deg, int speeds)
 {
     int v[4][2] = {0};
 
-    for(int i = 1; i <= MOTORNUM; i++){
+    for(int i = 1; i < MOTORNUM+1; i++){
         v[i-1][1] = deg2out(deg, i, 250);
         if(v[i-1][1] > 0){
             v[i-1][0] = 1;
