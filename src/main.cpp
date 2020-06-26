@@ -34,3 +34,72 @@ void loop() {
 	//analogWrite(D2M2P, 174);
 	while(1);
 }
+/*
+#include <SoftwareSerial.h>
+
+SoftwareSerial ms(2,3);
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(115200);
+  pinMode(13, OUTPUT);
+  ms.begin(115200);
+  ms.println("HelloWorld");
+  
+}
+
+static long long i = 0;
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  //Serial.println("HelloWorld");
+  if(i == 0 ){
+    digitalWrite(8, HIGH);
+    delay(1000);
+    i++;
+  }
+  int data[20];
+  if(InputRobo(data) == 1){
+    Serial.println("OK");
+    for(int j = 0; j < 10; j++){
+      ms.println(data[j]);
+    }
+    digitalWrite(8, HIGH);
+  }
+  else{
+    Serial.println("No");
+    digitalWrite(8, LOW);
+  }
+  delay(20);
+}
+
+int InputRobo(int *data)
+{
+  if(Serial.available() > 12){
+    int magic = Serial.read();
+    if(magic == 0xff){
+      int fuct, sizes;
+      fuct = Serial.read();
+      if(fuct == 0x10){
+        int sizes = Serial.read();
+        int8_t checksum = 0;
+        for(int i = 0; i < sizes; i++){
+          data[i] = Serial.read();
+          checksum = checksum ^ data[i];
+        }
+        int dt = Serial.read();
+        if(checksum == dt){
+          return 1;
+        }
+      }
+      else if(fuct == 0x01){
+        
+      }
+    }
+    else{
+      return -1;
+    }
+  }
+  return -1;
+}
+*/
