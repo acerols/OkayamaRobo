@@ -28,7 +28,7 @@ void setup() {
   pinMode(D2M2D, OUTPUT);	
 	pinMode(D2M2P, OUTPUT);
 	
-	Serial.begin(115200);
+	Serial.begin(115200, 10, 11);
   Serial.println("Helloworld");
 }
 
@@ -40,6 +40,7 @@ void loop() {
   AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
 					D2M1D, D2M1P, D2M2D, D2M2P
 	);
+  /*
   ctr.movedir(0, 250);
   delay(1000);
   ctr.movedir(0, 0);
@@ -58,6 +59,14 @@ void loop() {
   delay(MotorCool);
   ctr.movedir(0, 0);
   delay(1000);
+  */
+	if(InputRobo(dt) > 0){
+		Serial.println("OK");
+	}
+	else{
+		Serial.println("No");
+	}
+	delay(50);
   
   //
 	//analogWrite(D1M1P, 174);
