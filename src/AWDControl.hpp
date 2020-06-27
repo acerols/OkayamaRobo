@@ -27,7 +27,7 @@ public:
 
 void AwdControl::ControlD1M1(int dir, int sp)
 {
-	if(dir){
+	if(dir == 1){
 		analogWrite(D1M1D, 0);
 	  	analogWrite(D1M1P, sp);
 	}
@@ -39,7 +39,7 @@ void AwdControl::ControlD1M1(int dir, int sp)
 
 void AwdControl::ControlD1M2(int dir, int sp)
 {
-	if(dir){
+	if(dir == 1){
 		analogWrite(D1M2D, 0);
 		analogWrite(D1M2P, sp);
 	}
@@ -92,6 +92,16 @@ void AwdControl::setD1(int m1d, int m1p, int m2d, int m2p)
   analogWrite(D1M1P, 0);
   analogWrite(D1M2D, 0);
   analogWrite(D1M2P, 0);
+  /*
+  Serial.print(D1M1D);
+  Serial.print(" ");
+  Serial.print(D1M1P);
+  Serial.print(" ");
+  Serial.print(D1M2D);
+  Serial.print(" ");
+  Serial.print(D1M2P);
+  Serial.println(" ");
+  */
 }
 
 void AwdControl::setD2(int m1d, int m1p, int m2d, int m2p)
@@ -104,6 +114,16 @@ void AwdControl::setD2(int m1d, int m1p, int m2d, int m2p)
   analogWrite(D2M1P, 0);
   analogWrite(D2M2D, 0);
   analogWrite(D2M2P, 0);
+  /*
+  Serial.print(D2M1D);
+  Serial.print(" ");
+  Serial.print(D2M1P);
+  Serial.print(" ");
+  Serial.print(D2M2D);
+  Serial.print(" ");
+  Serial.print(D2M2P);
+  Serial.println(" ");
+  */
 }
 
 const double pi = 3.141592;
@@ -136,22 +156,48 @@ int deg2out(int deg, int MN)
 int deg2out(int deg, int MN, int speeds)
 {
     int spd;
-    if(speeds > 250)speeds = 250;
-    else if(speeds < 0) speeds = 0;
+    
+    //else if(speeds < 0) speeds = 0;
     /* 
     角度に対するＰＷＭ最大出力を決める
     */
     double c = cos(deg2rad(deg));
     double s = sin(deg2rad(deg));
-    double t = max(c, s);
+    double t = max(abs(c), abs(s));
     spd = 250 / (1.0 / t);
+    //スピードが
+    if (speeds > 250){
+        speeds = spd;
+    }
+
     double rad = deg * (pi / 180);
     double Y = sin(rad);
     double X = cos(rad);
+    int y = (int)(Y * (double)speeds);
+    int x = (int)(X * (double)speeds);
+#ifdef DEBUG
+    Serial.print("X ");
+    Serial.print(x);
+    Serial.print(" MX ");
+    Serial.print(x * MV[MN-1][0]);
+    Serial.print(" Y ");
+    Serial.print(y);
+    Serial.print(" MY ");
+    Serial.print(y * MV[MN-1][1]);
+#endif
     int OUT = (
-        Y * MV[MN-1][0] * spd +
-        X * MV[MN-1][1] * spd
+        y * MV[MN-1][0] +
+        x * MV[MN-1][1]
     );
+#ifdef DEBUG
+    Serial.print(" spd ");
+    Serial.print(speeds);  
+    Serial.print(" OUT ");
+    Serial.print(OUT);
+    Serial.println(" ");
+    Serial.print("max spd");
+    Serial.println(spd);
+#endif
     return OUT;
 }
 
@@ -167,11 +213,12 @@ void AwdControl::movefored(void)
         else{
             v[i-1][0] = -1;
         }
+#ifdef  DEBUG
         Serial.print(i);
         Serial.print(" : output : ");
         Serial.println(v[i-1][1]);
+#endif
     }
-    Serial.println("End");
     ControlD1M1(v[0][0], v[0][1]);
     ControlD1M2(v[1][0], v[1][1]);
     ControlD2M1(v[2][0], v[2][1]);
@@ -182,8 +229,16 @@ void AwdControl::movedir(int deg, int speeds)
 {
     int v[4][2] = {0};
 
+    if(speeds == 0){
+        ControlD1M1(0, 0);
+        ControlD1M2(0, 0);
+        ControlD2M1(0, 0);
+        ControlD2M2(0, 0);
+        return;
+    }
+
     for(int i = 1; i < MOTORNUM+1; i++){
-        v[i-1][1] = deg2out(deg, i, 250);
+        v[i-1][1] = deg2out(deg, i, speeds);
         if(v[i-1][1] > 0){
             v[i-1][0] = 1;
         }
@@ -191,6 +246,26 @@ void AwdControl::movedir(int deg, int speeds)
             v[i-1][0] = -1;
         }
     }
+#ifdef  DEBUG
+
+    Serial.print(v[0][1]);
+    Serial.print(" ");
+    Serial.print(v[1][1]);
+    Serial.print(" ");
+    Serial.print(v[2][1]);
+    Serial.print(" ");
+    Serial.print(v[3][1]);
+    Serial.println();
+    Serial.print(v[0][0]);
+    Serial.print(" ");
+    Serial.print(v[1][0]);
+    Serial.print(" ");
+    Serial.print(v[2][0]);
+    Serial.print(" ");
+    Serial.print(v[3][0]);
+    Serial.println();
+
+#endif
 
     ControlD1M1(v[0][0], v[0][1]);
     ControlD1M2(v[1][0], v[1][1]);

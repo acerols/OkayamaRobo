@@ -1,4 +1,10 @@
 #include <Arduino.h>
+
+
+#ifdef  DEBUG
+#undef  DEBUG
+#endif
+
 #include "AWDControl.hpp"
 
 const static int D1M1D = 2;
@@ -10,29 +16,52 @@ const static int D2M1P = 7;
 const static int D2M2D = 8;
 const static int D2M2P = 9;
 
+int InputRobo(int *data);
+
 void setup() {
   	// put your setup code here, to run once:
 	pinMode(D1M1D, OUTPUT);	
 	pinMode(D1M1P, OUTPUT);
-  	pinMode(D1M2D, OUTPUT);	
+	pinMode(D1M2D, OUTPUT);	
 	pinMode(D2M2P, OUTPUT);
 	pinMode(D2M1P, OUTPUT);
-  	pinMode(D2M2D, OUTPUT);	
+  pinMode(D2M2D, OUTPUT);	
 	pinMode(D2M2P, OUTPUT);
 	
-	Serial.begin(9600);
+	Serial.begin(115200);
+  Serial.println("Helloworld");
 }
 
 void loop() {
 	// put your main code here, to run repeatedly:
-	const int MP = 100;
-	AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
+	
+  int dt[20];
+  const int MotorCool = 1000; //Motor Cool Time
+  AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
 					D2M1D, D2M1P, D2M2D, D2M2P
 	);
-	ctr.movefored();
+  ctr.movedir(0, 250);
+  delay(1000);
+  ctr.movedir(0, 0);
+  delay(MotorCool);
+  ctr.movedir(90, 250);
+  delay(1000);
+  ctr.movedir(0, 0);
+  delay(MotorCool);
+  ctr.movedir(180, 250);
+  delay(1000);
+  ctr.movedir(0, 0);
+  delay(MotorCool);
+  ctr.movedir(270, 250);
+  delay(1000);
+  ctr.movedir(0, 0);
+  delay(MotorCool);
+  ctr.movedir(0, 0);
+  delay(1000);
+  
+  //
 	//analogWrite(D1M1P, 174);
 	//analogWrite(D2M2P, 174);
-	while(1);
 }
 /*
 #include <SoftwareSerial.h>
@@ -72,13 +101,14 @@ void loop() {
   }
   delay(20);
 }
+*/
 
 int InputRobo(int *data)
 {
   if(Serial.available() > 12){
     int magic = Serial.read();
     if(magic == 0xff){
-      int fuct, sizes;
+      int fuct;
       fuct = Serial.read();
       if(fuct == 0x10){
         int sizes = Serial.read();
@@ -102,4 +132,3 @@ int InputRobo(int *data)
   }
   return -1;
 }
-*/
