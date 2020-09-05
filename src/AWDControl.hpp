@@ -1,9 +1,18 @@
+#ifndef __AWDCONTROL_HPP__
+#define __AWDCONTROL_HPP__
+
 #include <Arduino.h>
 #include <math.h>
 
+namespace OkayamaRobo
+{
+
 const int MOTORNUM = 4;
 
-class AwdControl{
+
+
+class AwdControl
+{
 private:
   int D1M1D;
   int D1M1P;
@@ -22,7 +31,7 @@ public:
   void setD1(int m1d, int m1p, int m2d, int m2p);
   void setD2(int m1d, int m1p, int m2d, int m2p);
   void movefored(void);
-  void movedir(int deg, int speeds); 
+  void movedir(int deg, int speeds);
 };
 
 void AwdControl::ControlD1M1(int dir, int sp)
@@ -272,3 +281,6 @@ void AwdControl::movedir(int deg, int speeds)
     ControlD2M1(v[2][0], v[2][1]);
     ControlD2M2(v[3][0], v[3][1]);
 }
+}
+
+#endif
