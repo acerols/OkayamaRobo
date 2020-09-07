@@ -17,7 +17,7 @@ const static int USSensorRight = 1;
 
 int dt[20] = {0};
 
-SoftwareSerial ms(10, 11);
+SoftwareSerial Nano(10, 11);
 
 void setup() {
   // put your setup code here, to run once:
@@ -29,14 +29,30 @@ void setup() {
   pinMode(D2M1P, OUTPUT);
   pinMode(D2M2D, OUTPUT);	
   pinMode(D2M2P, OUTPUT);
-  ms.begin(115200);
+  Nano.begin(115200);
   Serial.begin(115200);
   Serial.println("Helloworld");
 }
 
+void test()
+{
+	LineSensor LS;
+	while(1){
+		int recnum = Nano.available();
+		int rec = RecData(&LS, &Nano);
+		//Serial.print("RecNumP : ");
+		//Serial.println(recnum);
+		if(rec > 0){
+			Serial.print("Rec : ");
+			Serial.println(LS.LSFront, DEC);
+		}
+
+	}
+}
+
 void loop() {
   // put your main code here, to run repeatedly:
-  
+	test();
 	const int MotorCool = 1000; //Motor Cool Time
 	AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
 		  D2M1D, D2M1P, D2M2D, D2M2P
@@ -48,10 +64,10 @@ void loop() {
 		int LY = dt[4] - 128;
 		//int RX = dt[5] - 128;
 		Serial.println(LX, DEC);
-		ms.print("LX : ");
-		ms.print(LX, DEC);
-		ms.print(" LY : ");
-		ms.println(LY, DEC);
+		Nano.print("LX : ");
+		Nano.print(LX, DEC);
+		Nano.print(" LY : ");
+		Nano.println(LY, DEC);
 		ctr.movedir(LX, LY, 250);
 		/*
 		if(LY > (127 + 60)){
@@ -78,7 +94,7 @@ void loop() {
 		*/
 	}
 	else{
-		ms.println("NO");
+		Nano.println("NO");
 	}
 	delay(20);
   /*
@@ -111,10 +127,10 @@ void ControlRobo(AwdControl &robo, int *cmd)
 	int LY = cmd[4];
 	int RX = cmd[5];
 
-	ms.print("LX : ");
-	ms.print(LX, DEC);
-	ms.print(" LY : ");
-	ms.println(LY, DEC);
+	Nano.print("LX : ");
+	Nano.print(LX, DEC);
+	Nano.print(" LY : ");
+	Nano.println(LY, DEC);
 	if(LY > (127 + 60)){
 		robo.movedir(90, 250);
 	}

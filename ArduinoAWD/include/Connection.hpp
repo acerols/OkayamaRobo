@@ -2,6 +2,7 @@
 #define __CONNECTION_HPP__
 
 #include <Arduino.h>
+#include <SoftwareSerial.h>
 
 struct Rec1Data
 {
@@ -25,8 +26,13 @@ struct SendData
 
 struct LineSensor
 {
+    int LSFront;
+    int LSLeft;
+    int LSRight;
+    int LSRear;
 };
 
 int InputRobo(int *data);
+int RecData(LineSensor *LS, SoftwareSerial *Nano);
 
 #endif
