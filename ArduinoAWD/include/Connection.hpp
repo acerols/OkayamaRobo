@@ -2,7 +2,11 @@
 #define __CONNECTION_HPP__
 
 #include <Arduino.h>
+#include <HardwareSerial.h>
 #include <SoftwareSerial.h>
+
+const int CONTROL = 0x10;
+const int AGENT = 0x20;
 
 struct Rec1Data
 {
@@ -14,14 +18,12 @@ struct Rec2Data
 
 struct SendData
 {
-    uint8_t USSL_L1;    //Ultra Sonic Sensor Light little 1byte
-    uint8_t USSL_L2;    //USSL Little 2byte
-    uint8_t USSR_L1;
-    uint8_t USSR_L2;
-    uint8_t BSFront;
-    uint8_t BSLeft;
-    uint8_t BSRight;
-    uint8_t BSRear;
+    uint16_t USSL;    //Ultra Sonic Sensor Light little 1byte
+    uint16_t USSR;    //USSL Little 2byte
+    uint16_t BSFront;
+    uint16_t BSLeft;
+    uint16_t BSRight;
+    uint16_t BSRear;
 };
 
 struct LineSensor
@@ -32,7 +34,15 @@ struct LineSensor
     int LSRear;
 };
 
-int InputRobo(int *data);
-int RecData(LineSensor *LS, SoftwareSerial *Nano);
+int InputRobo(int *data, int func);
+//int RecData(LineSensor *LS, SoftwareSerial *Nano);
+void SendRobo(SendData &sd, int func);
+
+//Arduino Nanoとの通信方式を包括したSoftwareSerialの継承
+class Nano : public SoftwareSerial{
+public:
+    Nano(int rx, int tx);
+    int RecData(LineSensor &LS);
+};
 
 #endif

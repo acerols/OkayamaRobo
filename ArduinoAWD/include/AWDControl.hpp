@@ -436,8 +436,6 @@ void AwdControl::movedir(int x, int y, int speeds)
     }
 
     for(int i = 1; i < MOTORNUM+1; i++){
-        Serial.print("Motor Num");
-        Serial.println(i, DEC);
         v[i-1][1] = xy2out(x, y, i, speeds);
         if(v[i-1][1] > 0){
             v[i-1][0] = 1;
