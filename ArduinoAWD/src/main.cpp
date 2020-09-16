@@ -12,8 +12,6 @@ const static int D2M1D = 7;
 const static int D2M1P = 6;
 const static int D2M2D = 8;
 const static int D2M2P = 9;
-const static int USSensorLeft = 0;
-const static int USSensorRight = 1;
 
 
 int dt[20] = {0};
@@ -54,7 +52,7 @@ void test()
 void loop() {
 	LineSensor LS;
 	SendData SD;
-	const int MotorCool = 1000; //Motor Cool Time
+	//test();
 	AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
 		  D2M1D, D2M1P, D2M2D, D2M2P
 	);
@@ -62,12 +60,7 @@ void loop() {
 	ctr.movefored();
 
 	if(InputRobo(dt, CONTROL) > 0){
-		SD.USSL = analogRead(0);
-		SD.USSR = analogRead(1);
-		SD.BSFront = analogRead(2);
-		SD.BSLeft = analogRead(3);
-		SD.BSRight = analogRead(4);
-		SD.BSRear = analogRead(5);
+		setSD(SD);
 		SendRobo(SD, 0x01);
 	}
 	else{
@@ -107,19 +100,3 @@ void ControlRobo(AwdControl &robo, int *cmd)
   
 }
 
-int getUSLegt()
-{
-  int len = analogRead(USSensorLeft);
-  return (len * 3);
-}
-
-int getUSRight()
-{
-  int len = analogRead(USSensorRight);
-  return (len * 3);
-}
-
-void SendRobo()
-{
-
-}

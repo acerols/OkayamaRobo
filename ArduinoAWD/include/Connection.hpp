@@ -37,12 +37,14 @@ struct LineSensor
 int InputRobo(int *data, int func);
 //int RecData(LineSensor *LS, SoftwareSerial *Nano);
 void SendRobo(SendData &sd, int func);
+void setSD(SendData &sd);
 
 //Arduino Nanoとの通信方式を包括したSoftwareSerialの継承
 class Nano : public SoftwareSerial{
 public:
     Nano(int rx, int tx);
     int RecData(LineSensor &LS);
+    byte Rec2byte(int &data);
 };
 
 #endif
