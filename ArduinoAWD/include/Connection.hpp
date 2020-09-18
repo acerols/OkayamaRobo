@@ -4,9 +4,12 @@
 #include <Arduino.h>
 #include <HardwareSerial.h>
 #include <SoftwareSerial.h>
+#include <Controller.hpp>
 
 const int CONTROL = 0x10;
 const int AGENT = 0x20;
+
+uint8_t retcs();
 
 struct Rec1Data
 {
@@ -34,7 +37,9 @@ struct LineSensor
     int LSRear;
 };
 
-int InputRobo(int *data, int func);
+int InputRobo(int *data);
+int InputRobo(AgentOrder &ao);
+byte Read2byte(int16_t &data);
 //int RecData(LineSensor *LS, SoftwareSerial *Nano);
 void SendRobo(SendData &sd, int func);
 void setSD(SendData &sd);

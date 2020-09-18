@@ -1,5 +1,7 @@
 #include <Arduino.h>
+#include <string.h>
 
+#define debug
 #include "AWDControl.hpp"
 #include <Connection.hpp>
 #include <debug.hpp>
@@ -18,6 +20,7 @@ int dt[20] = {0};
 
 Nano nano(10, 11);
 
+//SoftwareSerial debugs(10, 11);
 void setup() {
   // put your setup code here, to run once:
   pinMode(D1M1D, OUTPUT);	
@@ -29,10 +32,12 @@ void setup() {
   pinMode(D2M2D, OUTPUT);	
   pinMode(D2M2P, OUTPUT);
   nano.begin(115200);
+  //debugs.begin(115200);
   Serial.begin(115200);
   Serial.println("Helloworld");
 }
 
+/*
 void test()
 {
 	LineSensor LS;
@@ -48,22 +53,29 @@ void test()
 
 	}
 }
+*/
 
 void loop() {
 	LineSensor LS;
 	SendData SD;
-	//test();
+	AgentOrder AO;
 	AwdControl ctr(D1M1D, D1M1P, D1M2D, D1M2P,
 		  D2M1D, D2M1P, D2M2D, D2M2P
 	);
 	nano.RecData(LS);
-	ctr.movefored();
-
-	if(InputRobo(dt, CONTROL) > 0){
+	
+	/*
+	if(InputRobo(dt) > 0){
+		setSD(SD);
+		SendRobo(SD, 0x01);
+	}
+	*/
+	if(InputRobo(AO) > 0){
 		setSD(SD);
 		SendRobo(SD, 0x01);
 	}
 	else{
+
 		//assert("Connection Failed!!");
 	}
 	delay(10);

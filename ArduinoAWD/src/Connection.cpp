@@ -2,7 +2,14 @@
 #include <SoftwareSerial.h>
 #include <Sensor.hpp>
 
-int InputRobo(int *data, int func)
+static uint8_t checksumdebug;
+
+uint8_t retcs()
+{
+    return checksumdebug;
+}
+
+int InputRobo(int *data)
 {
     if (Serial.available() > 12)
     {
@@ -12,7 +19,7 @@ int InputRobo(int *data, int func)
             int funcPC;
             funcPC = Serial.read();
             //Recieved PC Controller Data
-            if (funcPC == CONTROL && func == CONTROL)
+            if (funcPC == CONTROL)
             {
                 int sizes = Serial.read();
                 uint8_t checksum = 0;
@@ -27,28 +34,41 @@ int InputRobo(int *data, int func)
                     return 1;
                 }
             }
-            //Received Agent Order and compass sensor data using IMU
-            else if (funcPC == AGENT && func == AGENT){
-                int velocity;   //-255 ~ 255
-                velocity = Serial.read();
-                int8_t omega;   //-180 ~ 180
-                omega = Serial.read();
-                byte nowThetaL, nowThetaH;
-                nowThetaL = Serial.read();
-                nowThetaH = Serial.read();
-                int nowTheta = (nowThetaH << 8) & 0xff00 | (nowThetaL & 0xff);  
-                byte targetThetaL, targetThetaH;
-                targetThetaL = Serial.read();
-                targetThetaH = Serial.read();
-                int targetTheta = (short)(((targetThetaH << 8) & 0xff00) | (targetThetaL & 0xff));
-            }
-        }
-        else
-        {
-            return -1;
         }
     }
     return -1;
+}
+
+int InputRobo(AgentOrder &ao)
+{
+    if(Serial.available() > 12){
+        int magic = Serial.read();
+        if(magic == 0xff){
+            int func = Serial.read();
+            byte checksumCulc = 0, checksumRec = 0, len;
+            if(func == AGENT){
+                len = Serial.read();
+                checksumCulc ^= Read2byte(ao.velocity);
+                checksumCulc ^= Read2byte(ao.omega);
+                checksumCulc ^= Read2byte(ao.NowAngle);
+                checksumCulc ^= Read2byte(ao.TargetAngle);
+                checksumRec = Serial.read();
+                if(checksumCulc == checksumRec){
+                    return 1;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+byte Read2byte(int16_t &data)
+{
+    byte data1, data2;
+    data1 = Serial.read();
+    data2 = Serial.read();
+    data = (short)((data2 << 8) & 0xff00) | (data1 & 0xff);
+    return (data1 ^ data2);
 }
 
 void SendRobo(SendData &sd, int func)
@@ -58,23 +78,25 @@ void SendRobo(SendData &sd, int func)
     buffer[0] = 0x64;   //magic number
     if(func == 0x01){
         buffer[1] = 0x01;   //protocol function
-        buffer[2] = (sd.USSL & 0xff);
-        buffer[3] = ((sd.USSL >> 8) & 0xff);
-        buffer[4] = (sd.USSR & 0xff);
-        buffer[5] = ((sd.USSR >> 8) & 0xff);
-        buffer[6] = (sd.BSFront & 0xff);
-        buffer[7] = (sd.BSFront >> 8) & 0xff;
-        buffer[8] = (sd.BSLeft & 0xff);
-        buffer[9] = (sd.BSLeft >> 8) & 0xff;
-        buffer[10] = (sd.BSRight & 0xff);
-        buffer[11] = (sd.BSRight >> 8) & 0xff;
-        buffer[12] = (sd.BSRear & 0xff);
-        buffer[13] = (sd.BSRear >> 8) & 0xff;
-        for(int i = 2; i <= 13; i++){
+        buffer[2] = 12;
+        buffer[3] = (sd.USSL & 0xff);
+        buffer[4] = ((sd.USSL >> 8) & 0xff);
+        buffer[5] = (sd.USSR & 0xff);
+        buffer[6] = ((sd.USSR >> 8) & 0xff);
+        buffer[7] = (sd.BSFront & 0xff);
+        buffer[8] = (sd.BSFront >> 8) & 0xff;
+        buffer[9] = (sd.BSLeft & 0xff);
+        buffer[10] = (sd.BSLeft >> 8) & 0xff;
+        buffer[11] = (sd.BSRight & 0xff);
+        buffer[12] = (sd.BSRight >> 8) & 0xff;
+        buffer[13] = (sd.BSRear & 0xff);
+        buffer[14] = (sd.BSRear >> 8) & 0xff;
+        for(int i = 3; i <= 14; i++){
             checksum ^= buffer[i];
         }
-        buffer[14] = checksum;
-        for(int i = 0; i <= 14; i++){
+        buffer[15] = checksum;
+        ::checksumdebug = checksum;
+        for(int i = 0; i <= 15; i++){
             Serial.write(buffer[i]);
         }
     }
