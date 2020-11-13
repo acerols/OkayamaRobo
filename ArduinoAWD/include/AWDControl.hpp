@@ -1,37 +1,50 @@
 #include <Arduino.h>
 #include <math.h>
 
+#include <Connection.hpp>
+
 const int MOTORNUM = 4;
+
+extern Nano nano;
 
 class AwdControl{
 private:
-  int D1M1D;
-  int D1M1P;
-  int D1M2D;
-  int D1M2P;
-  int D2M1D;
-  int D2M1P;
-  int D2M2D;
-  int D2M2P;
-  void ControlD1M1(int dir, int sp);
-  void ControlD1M2(int dir, int sp);
-  void ControlD2M1(int dir, int sp);
-  void ControlD2M2(int dir, int sp);
-  void MControlD1M1(int dir, int sp);
-  void MControlD1M2(int dir, int sp);
-  void MControlD2M1(int dir, int sp);
-  void MControlD2M2(int dir, int sp);
+    int D1M1D;
+    int D1M1P;
+    int D1M2D;
+    int D1M2P;
+    int D2M1D;
+    int D2M1P;
+    int D2M2D;
+    int D2M2P;
+    void ControlD1M1(int dir, int sp);
+    void ControlD1M2(int dir, int sp);
+    void ControlD2M1(int dir, int sp);
+    void ControlD2M2(int dir, int sp);
+    void MControlD1M1(int dir, int sp);
+    void MControlD1M2(int dir, int sp);
+    void MControlD2M1(int dir, int sp);
+    void MControlD2M2(int dir, int sp);
+
+    int16_t pre_P, duty;
+    int16_t P, I, D;
+    const double dt = 0.1;
+    const double KP = 0.5;
+    const double  KI = 0.2;
+    const double KD = 0.05;
+
 public:
-  AwdControl(int d1m1d, int d1m1p, int d1m2d, int d1m2p, int d2m1d, int d2m1p, int d2m2d, int d2m2p);
-  void setD1(int m1d, int m1p, int m2d, int m2p);
-  void setD2(int m1d, int m1p, int m2d, int m2p);
-  void movefored(void);
-  void setMD1(int m1d, int m1p, int m2d, int m2p);
-  void setMD2(int m1d, int m1p, int m2d, int m2p);
-  void movedir(int deg, int speeds);
-  void movedir(int x, int y, int speeds);
-  //void movedir(int deg, int speeds, int theta); 
-  void moveturn(int dir, int speeds);
+    AwdControl(int d1m1d, int d1m1p, int d1m2d, int d1m2p, int d2m1d, int d2m1p, int d2m2d, int d2m2p);
+    void setD1(int m1d, int m1p, int m2d, int m2p);
+    void setD2(int m1d, int m1p, int m2d, int m2p);
+    void movefored(void);
+    void setMD1(int m1d, int m1p, int m2d, int m2p);
+    void setMD2(int m1d, int m1p, int m2d, int m2p);
+    void movedir(int deg, int speeds);
+    void movedir(int x, int y, int speeds);
+    //void movedir(int deg, int speeds, int theta); 
+    void moveturn(int dir, int speeds);
+    void turn_pid(int NowAngle, int TargetAngle, bool enable);
 };
 
 void AwdControl::ControlD1M1(int dir, int sp)
@@ -145,6 +158,7 @@ AwdControl::AwdControl(int d1m1d, int d1m1p, int d1m2d, int d1m2p, int d2m1d, in
 {
   this->setMD1(d1m1d, d1m1p, d1m2d, d1m2p);
   this->setMD2(d2m1d, d2m1p, d2m2d, d2m2p);
+  pre_P = 0;
 }
 
 void AwdControl::setD1(int m1d, int m1p, int m2d, int m2p)
@@ -469,9 +483,15 @@ void AwdControl::movedir(int x, int y, int speeds)
     MControlD2M1(v[2][0], v[2][1]);
     MControlD2M2(v[3][0], v[3][1]);
 }
+
 /*
-void AwdControl::movedir(int deg, int speeds, int theta)
+void AwdControl::movedir(int deg, int speeds)
 {
+    double rads = deg2rad(deg);
+    int x = (int)cos((double)rads);
+    int y = (int)sin((double)rads);
+    movedir(x, y, speeds);
+    /*
     int v[4][2] = {0};
 
     if(speeds == 0){
@@ -515,8 +535,11 @@ void AwdControl::movedir(int deg, int speeds, int theta)
     MControlD1M2(v[1][0], v[1][1]);
     MControlD2M1(v[2][0], v[2][1]);
     MControlD2M2(v[3][0], v[3][1]);
+    
 }
+
 */
+
 
 int deg2out(int deg, int MN, int speeds, int theta)
 {
@@ -589,4 +612,46 @@ void AwdControl::moveturn(int dir, int speeds)
     MControlD1M2(v[1][0], v[1][1]);
     MControlD2M1(v[2][0], v[2][1]);
     MControlD2M2(v[3][0], v[3][1]);
+}
+
+void AwdControl::turn_pid(int NowAngle, int TargetAngle, bool enable)
+{
+    int16_t angle = NowAngle + 180;
+    int16_t target = TargetAngle + 180;
+    P = target - angle;
+    I += (int16_t)((double)P * dt);
+    D = (int16_t)((double)(P - pre_P) / dt);
+    pre_P = P;
+    int16_t kp = KP * P;
+    int16_t ki = KI * I * 0;
+    int16_t kd = KD * D;
+    int16_t turnsp = kp + ki + kd;
+    if(turnsp > 255)
+        turnsp = 255;
+    if(turnsp < -255)
+        turnsp = -255;
+
+    nano.print("angle");
+    nano.println(angle);
+    nano.print("GoalAngel");
+    nano.println(target);
+    nano.print("P ");
+    nano.print(P);
+    nano.print(" pre_P ");
+    nano.println(pre_P);
+    nano.print("kp ");
+    nano.println(kp);
+    nano.print("I ");
+    nano.println(I);
+    nano.print("ki ");
+    nano.println(ki);
+    nano.print("D ");
+    nano.println(D);
+    nano.print("kd");
+    nano.println(kd);
+    nano.print("turn speed");
+    nano.println(turnsp);
+    if(enable){
+        moveturn(turnsp, turnsp);
+    }
 }

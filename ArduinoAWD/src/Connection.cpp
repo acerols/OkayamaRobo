@@ -39,7 +39,7 @@ int InputRobo(int *data)
     return -1;
 }
 
-int InputRobo(AgentOrder &ao)
+int InputRobo(AgentOrder *ao)
 {
     if(Serial.available() > 12){
         int magic = Serial.read();
@@ -48,10 +48,10 @@ int InputRobo(AgentOrder &ao)
             byte checksumCulc = 0, checksumRec = 0, len;
             if(func == AGENT){
                 len = Serial.read();
-                checksumCulc ^= Read2byte(ao.velocity);
-                checksumCulc ^= Read2byte(ao.omega);
-                checksumCulc ^= Read2byte(ao.NowAngle);
-                checksumCulc ^= Read2byte(ao.TargetAngle);
+                checksumCulc ^= Read2byte(&(ao->velocity));
+                checksumCulc ^= Read2byte(&(ao->omega));
+                checksumCulc ^= Read2byte(&(ao->NowAngle));
+                checksumCulc ^= Read2byte(&(ao->TargetAngle));
                 checksumRec = Serial.read();
                 if(checksumCulc == checksumRec){
                     return 1;
@@ -62,12 +62,12 @@ int InputRobo(AgentOrder &ao)
     return -1;
 }
 
-byte Read2byte(int16_t &data)
+byte Read2byte(int16_t *data)
 {
     byte data1, data2;
     data1 = Serial.read();
     data2 = Serial.read();
-    data = (short)((data2 << 8) & 0xff00) | (data1 & 0xff);
+    *data = (short)((data2 << 8) & 0xff00) | (data1 & 0xff);
     return (data1 ^ data2);
 }
 
@@ -78,7 +78,7 @@ void SendRobo(SendData &sd, int func)
     buffer[0] = 0x64;   //magic number
     if(func == 0x01){
         buffer[1] = 0x01;   //protocol function
-        buffer[2] = 12;
+        buffer[2] = 12;     //len   
         buffer[3] = (sd.USSL & 0xff);
         buffer[4] = ((sd.USSL >> 8) & 0xff);
         buffer[5] = (sd.USSR & 0xff);
@@ -111,7 +111,7 @@ void setSD(SendData &sd)
     sd.BSFront = (uint16_t)getBSFront();
     sd.BSLeft = (uint16_t)getBSLeft();
     sd.BSRight = (uint16_t)getBSRight();
-    sd.BSRear = (uint16_t)getBSRight();
+    sd.BSRear = (uint16_t)getBSRear();
 }
 
 //コンストラクタ　コピー

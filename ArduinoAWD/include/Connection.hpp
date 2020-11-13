@@ -38,8 +38,8 @@ struct LineSensor
 };
 
 int InputRobo(int *data);
-int InputRobo(AgentOrder &ao);
-byte Read2byte(int16_t &data);
+int InputRobo(AgentOrder *ao);
+byte Read2byte(int16_t *data);
 //int RecData(LineSensor *LS, SoftwareSerial *Nano);
 void SendRobo(SendData &sd, int func);
 void setSD(SendData &sd);

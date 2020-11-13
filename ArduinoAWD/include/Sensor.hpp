@@ -1,11 +1,11 @@
 #include <Arduino.h>
 
-const static int USSensorLeft = 0;
-const static int USSensorRight = 1;
-const static int BSensorFront = 2;
-const static int BSensorLeft = 3;
-const static int BSensorRight = 4;
-const static int BSensorRear = 5;
+const static int USSensorLeft = A4;
+const static int USSensorRight = A5;
+const static int BSensorFront = A0;
+const static int BSensorLeft = A1;
+const static int BSensorRight = A2;
+const static int BSensorRear = A3;
 
 int getUSSLeft();
 int getUSSRight();
