@@ -411,26 +411,24 @@ void AwdControl::movedir(int deg, int speeds)
             v[i-1][0] = -1;
         }
     }
-#ifdef  DEBUG
 
-    Serial.print(v[0][1]);
-    Serial.print(" ");
-    Serial.print(v[1][1]);
-    Serial.print(" ");
-    Serial.print(v[2][1]);
-    Serial.print(" ");
-    Serial.print(v[3][1]);
-    Serial.println();
-    Serial.print(v[0][0]);
-    Serial.print(" ");
-    Serial.print(v[1][0]);
-    Serial.print(" ");
-    Serial.print(v[2][0]);
-    Serial.print(" ");
-    Serial.print(v[3][0]);
-    Serial.println();
+    nano.print(v[0][1]);
+    nano.print(" ");
+    nano.print(v[1][1]);
+    nano.print(" ");
+    nano.print(v[2][1]);
+    nano.print(" ");
+    nano.print(v[3][1]);
+    nano.println();
+    nano.print(v[0][0]);
+    nano.print(" ");
+    nano.print(v[1][0]);
+    nano.print(" ");
+    nano.print(v[2][0]);
+    nano.print(" ");
+    nano.print(v[3][0]);
+    nano.println();
 
-#endif
     MControlD1M1(v[0][0], v[0][1]);
     MControlD1M2(v[1][0], v[1][1]);
     MControlD2M1(v[2][0], v[2][1]);
@@ -631,6 +629,7 @@ void AwdControl::turn_pid(int NowAngle, int TargetAngle, bool enable)
     if(turnsp < -255)
         turnsp = -255;
 
+    /*
     nano.print("angle");
     nano.println(angle);
     nano.print("GoalAngel");
@@ -651,6 +650,7 @@ void AwdControl::turn_pid(int NowAngle, int TargetAngle, bool enable)
     nano.println(kd);
     nano.print("turn speed");
     nano.println(turnsp);
+    */
     if(enable){
         moveturn(turnsp, turnsp);
     }

@@ -59,7 +59,6 @@ void test()
 	}
 }
 
-
 void loop() {
 	LineSensor LS;
 	SendData SD;
@@ -69,43 +68,42 @@ void loop() {
 		  D2M1D, D2M1P, D2M2D, D2M2P
 	);
 
+
+
 	nano.RecData(LS);
 	AO.velocity = 0;
 	AO.omega = 0;
 	if(InputRobo(&AO) > 0){
 		GoalAngle = AO.TargetAngle;
-		//setSD(SD);
+		setSD(SD);
 		SendRobo(SD, 0x01);
 		loopcast = 0;
-		ControlRobo(&ctr, &AO);
 	}
 	else{
 		loopcast++;
-		AO.velocity = 0;
-		AO.omega = 0;
 		AO.NowAngle = 0;
 		AO.TargetAngle = GoalAngle;
 		if(loopcast > 10){
 			AO.velocity = 0;
 			AO.omega = 0;
-			ControlRobo(&ctr, &AO);
+			//ControlRobo(&ctr, &AO);
 		}
 		//assert("Connection Failed!!");
 	}
+	ControlRobo(&ctr, &AO);
 	delay(20);
   
 }
 
 void ControlRobo(AwdControl *robo, AgentOrder *ao)
 {
+	bool turnflag=true;
 	if(ao->velocity != 0){
 		robo->movedir((uint8_t)ao->omega, ((uint8_t)ao->velocity));
-		robo->turn_pid((int16_t)ao->NowAngle, (int16_t)ao->TargetAngle, false);
+		turnflag = false;
 	}
-	else{
-		nano.println("PID");
-		robo->turn_pid((int16_t)ao->NowAngle, (int16_t)ao->TargetAngle, true);
-	}
+
+	robo->turn_pid((int16_t)ao->NowAngle, (int16_t)ao->TargetAngle, turnflag);
 }
 
 void ControlRobo(AwdControl &robo, int *cmd)
